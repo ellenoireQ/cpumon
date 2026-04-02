@@ -36,11 +36,18 @@ impl CPUState {
     fn read_all_cpus(&mut self) {
         for path in &self.path {
             let path_gov = format!("{}/scaling_governor", path.display());
+            let cpu_name = path.file_name().unwrap().to_string_lossy();
+
+            let id = cpu_name
+                .trim_start_matches("policy")
+                .parse::<usize>()
+                .unwrap();
+
             let scaling_gov =
                 fs::read_to_string(path_gov).expect("Should have been able to read the file");
 
             let cpu = Cpu {
-                id: 0,
+                id: id as u32,
                 path: path.to_path_buf(),
                 scaling_gov: scaling_gov,
             };
