@@ -20,7 +20,7 @@ fn main() {
 
     if args.read {
         let cpu = CPUState::new();
-        cpu.path.iter().for_each(|f| println!("{:?}", f));
+        cpu.cpu.iter().for_each(|f| println!("{}", f.scaling_gov));
     }
     if args.version {
         println!("{}", version());
