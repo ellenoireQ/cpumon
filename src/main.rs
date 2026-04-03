@@ -22,10 +22,16 @@ fn main() {
         let cpu = CPUState::new();
         cpu.cpu.iter().for_each(|f| {
             println!(
-                "ID: {}\npath: {}\nscale_gov: {}",
+                "ID: {}\npath: {}\nscale_gov: {}\nscaling_available_governors: {}\nscaling_cur_freq: {}\nscaling_driver: {}\nscaling_governor: {}\nscaling_max_freq: {}\nscaling_min_freq: {}",
                 f.id,
                 f.path.display(),
-                f.scaling_gov
+                f.scaling_gov,
+                f.scaling_available_governors,
+                f.scaling_cur_freq,
+                f.scaling_driver,
+                f.scaling_governor,
+                f.scaling_max_freq,
+                f.scaling_min_freq
             )
         });
     }
