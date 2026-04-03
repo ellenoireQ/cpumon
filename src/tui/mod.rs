@@ -15,7 +15,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout},
     style::{Color, Modifier, Style},
     text::Line,
-    widgets::{Cell, Paragraph, Row, Table, TableState},
+    widgets::{Cell, Paragraph, Row, Table, TableState, Wrap},
     Frame, Terminal,
 };
 
@@ -266,9 +266,11 @@ fn read_processes() -> HashMap<i32, ProcessInfo> {
             continue;
         };
 
-        let Some((name, ppid, last_cpu)) = parse_stat(&stat_content) else {
+        let Some((stat_name, ppid, last_cpu)) = parse_stat(&stat_content) else {
             continue;
         };
+
+        let name = read_cmdline(pid).unwrap_or(stat_name);
 
         map.insert(
             pid,
@@ -302,6 +304,27 @@ fn parse_stat(content: &str) -> Option<(String, i32, Option<u32>)> {
     let last_cpu = fields.get(36).and_then(|value| value.parse::<u32>().ok());
 
     Some((name, ppid, last_cpu))
+}
+
+fn read_cmdline(pid: i32) -> Option<String> {
+    let cmdline_path = format!("/proc/{}/cmdline", pid);
+    let bytes = fs::read(cmdline_path).ok()?;
+    if bytes.is_empty() {
+        return None;
+    }
+
+    let cmdline = bytes
+        .split(|byte| *byte == 0)
+        .filter(|part| !part.is_empty())
+        .map(|part| String::from_utf8_lossy(part).to_string())
+        .collect::<Vec<_>>()
+        .join(" ");
+
+    if cmdline.trim().is_empty() {
+        None
+    } else {
+        Some(cmdline)
+    }
 }
 
 pub fn run() -> io::Result<()> {
@@ -419,7 +442,7 @@ fn draw(frame: &mut Frame, app: &mut App) {
         .iter()
         .map(|line| Line::from(line.as_str()))
         .collect::<Vec<_>>();
-    let process_tree = Paragraph::new(process_lines);
+    let process_tree = Paragraph::new(process_lines).wrap(Wrap { trim: false });
 
     frame.render_widget(process_tree, chunks[2]);
 }
