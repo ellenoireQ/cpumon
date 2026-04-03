@@ -6,7 +6,7 @@ pub struct Cpu {
     pub id: u32,
     pub path: PathBuf,
     pub scaling_gov: String,
-    pub scaling_available_governors: String,
+    pub scaling_available_governors: Vec<String>,
     pub scaling_cur_freq: String,
     pub scaling_driver: String,
     pub scaling_governor: String,
@@ -41,7 +41,8 @@ impl CPUState {
 
     fn read_all_cpus(&mut self) {
         for path in &self.path {
-            let path_available_governors = format!("{}/scaling_available_governors", path.display());
+            let path_available_governors =
+                format!("{}/scaling_available_governors", path.display());
             let path_cur_freq = format!("{}/scaling_cur_freq", path.display());
             let path_driver = format!("{}/scaling_driver", path.display());
             let path_governor = format!("{}/scaling_governor", path.display());
@@ -54,10 +55,14 @@ impl CPUState {
                 .parse::<usize>()
                 .unwrap();
 
-            let scaling_available_governors = fs::read_to_string(path_available_governors)
-                .expect("Should have been able to read the file")
-                .trim()
-                .to_string();
+            let scaling_available_governors: Vec<String> =
+                fs::read_to_string(path_available_governors)
+                    .expect("Should have been able to read the file")
+                    .trim()
+                    .split(' ')
+                    .map(|s| s.to_string())
+                    .collect();
+
             let scaling_cur_freq = fs::read_to_string(path_cur_freq)
                 .expect("Should have been able to read the file")
                 .trim()
