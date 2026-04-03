@@ -1,5 +1,6 @@
 mod cli;
 mod cpu;
+mod tui;
 use clap::Parser;
 
 use crate::{cli::version::version, cpu::class::CPUState};
@@ -10,6 +11,10 @@ struct Cli {
     #[arg(short, long)]
     read: bool,
 
+    /// interactive Terminal UI
+    #[arg(short = 't', long)]
+    tui: bool,
+
     /// Show version
     #[arg(short, long)]
     version: bool,
@@ -17,6 +22,11 @@ struct Cli {
 
 fn main() {
     let args = Cli::parse();
+
+    if args.version {
+        println!("{}", version());
+        return;
+    }
 
     if args.read {
         let cpu = CPUState::new();
@@ -34,8 +44,13 @@ fn main() {
                 f.scaling_min_freq
             )
         });
+        return;
     }
-    if args.version {
-        println!("{}", version());
+
+    if args.tui || !args.read {
+        if let Err(e) = tui::run() {
+            eprintln!("failed to start TUI: {e}");
+            std::process::exit(1);
+        }
     }
 }
