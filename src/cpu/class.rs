@@ -1,6 +1,11 @@
-use std::{fs, path::PathBuf};
+use std::{fs, io::Error, path::PathBuf};
 
 use glob::glob;
+
+pub enum Val {
+    String(String),
+    Int(u32),
+}
 
 pub struct Cpu {
     pub id: u32,
@@ -97,6 +102,13 @@ impl CPUState {
             };
 
             self.cpu.push(cpu);
+        }
+    }
+
+    pub fn write(&self, path: PathBuf, expect: Val) -> Result<(), Error> {
+        match expect {
+            Val::String(s) => fs::write(path, s),
+            Val::Int(i) => fs::write(path, i.to_string()),
         }
     }
 }
