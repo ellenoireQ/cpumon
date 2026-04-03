@@ -134,7 +134,12 @@ fn draw(frame: &mut Frame, app: &mut App) {
         Cell::from("max"),
         Cell::from("driver"),
     ])
-    .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD));
+    .style(
+        Style::default()
+            .fg(Color::Black)
+            .bg(Color::White)
+            .add_modifier(Modifier::BOLD),
+    );
 
     let rows = app.cpu_state.cpu.iter().map(|cpu| {
         Row::new(vec![
